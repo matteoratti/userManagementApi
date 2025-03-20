@@ -1,6 +1,34 @@
 @userManagementApi_HostAddress = http://localhost:5202
 
-GET {{userManagementApi_HostAddress}}/weatherforecast/
+###
+
+GET {{userManagementApi_HostAddress}}/api/user
 Accept: application/json
 
 ###
+
+GET {{userManagementApi_HostAddress}}/api/user/1
+Accept: application/json
+
+###
+
+POST {{userManagementApi_HostAddress}}/api/user
+Content-Type: application/json
+
+{
+  "username": "newuser"
+}
+
+###
+
+PUT {{userManagementApi_HostAddress}}/api/user/1
+Content-Type: application/json
+
+{
+  "username": "updateduser"
+}
+
+###
+
+DELETE {{userManagementApi_HostAddress}}/api/user/1
+Accept: application/json
