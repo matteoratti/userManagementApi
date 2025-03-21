@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class UserController : Controller
@@ -10,9 +12,9 @@ public class UserController : Controller
 
     private static List<User> _users = new List<User>
     {
-        new User { Id = 0, Username = "gelato", Email = "user1@gmail.com" },
-        new User { Id = 1, Username = "biscotto", Email = "user2@gmail.com" },
-        new User { Id = 2, Username = "pizza", Email =  "user3@gmail.com" }
+        new User { Id = 0, Username = "ken", Email = "user1@gmail.com", Password = "password1" },
+        new User { Id = 1, Username = "bob", Email = "user2@gmail.com", Password = "password2" },
+        new User { Id = 2, Username = "mike", Email =  "user3@gmail.com", Password = "password3" }
     };
 
     private static readonly object _lock = new object();
