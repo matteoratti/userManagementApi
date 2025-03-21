@@ -1,16 +1,21 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 [Route("api/[controller]")]
 [ApiController]
 public class UserController : Controller
 {
-    private static List<User> _users = [];
 
-    public UserController() =>
-        // initialize with some users
-        _users = [new() { Id = 1, Username = "User1", Email = "test@gmail.com" }];
+    private static List<User> _users = new List<User>
+    {
+        new User { Id = 0, Username = "gelato", Email = "user1@gmail.com" },
+        new User { Id = 1, Username = "biscotto", Email = "user2@gmail.com" },
+        new User { Id = 2, Username = "pizza", Email =  "user3@gmail.com" }
+    };
+
+    private static readonly object _lock = new object();
 
     [HttpGet]
     public ActionResult<List<User>> GetUsers()
@@ -30,35 +35,54 @@ public class UserController : Controller
     }
 
     [HttpPost]
-    public ActionResult<User> CreateUser(User user)
+    public ActionResult<User> CreateUser([FromBody] User user)
     {
-        user.Id = _users.Count + 1;
-        _users.Add(user);
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        lock (_lock)
+        {
+            user.Id = _users.Count + 1;
+            _users.Add(user);
+        }
         return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
     }
 
     [HttpPut("{id}")]
-    public ActionResult<User> UpdateUser(int id, User user)
+    public ActionResult<User> UpdateUser(int id, [FromBody] User user)
     {
-        var existingUser = _users.FirstOrDefault(u => u.Id == id);
-        if (existingUser == null)
+        if (!ModelState.IsValid)
         {
-            return NotFound();
+            return BadRequest(ModelState);
         }
-        existingUser.Username = user.Username;
-        existingUser.Email = user.Email;
-        return Ok(existingUser);
+
+        lock (_lock)
+        {
+            var existingUser = _users.FirstOrDefault(u => u.Id == id);
+            if (existingUser == null)
+            {
+                return NotFound();
+            }
+            existingUser.Username = user.Username;
+            existingUser.Email = user.Email;
+        }
+        return Ok(user);
     }
 
     [HttpDelete("{id}")]
     public ActionResult DeleteUser(int id)
     {
-        var user = _users.FirstOrDefault(u => u.Id == id);
-        if (user == null)
+        lock (_lock)
         {
-            return NotFound();
+            var user = _users.FirstOrDefault(u => u.Id == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            _users.Remove(user);
         }
-        _users.Remove(user);
         return NoContent();
     }
 }
